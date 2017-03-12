@@ -9,7 +9,7 @@
 import Foundation
 import MapKit
 
-public class FBQuadTreeNode : NSObject {
+open class FBQuadTreeNode : NSObject {
     
     var boundingBox:FBBoundingBox? = nil
     
@@ -60,19 +60,19 @@ public class FBQuadTreeNode : NSObject {
     
     // MARK: - Class functions
     
-    class func FBBoundingBoxMake(x0:CGFloat, y0:CGFloat, xf:CGFloat, yf:CGFloat) -> FBBoundingBox{
+    class func FBBoundingBoxMake(_ x0:CGFloat, y0:CGFloat, xf:CGFloat, yf:CGFloat) -> FBBoundingBox{
         
         let box = FBBoundingBox(x0: x0, y0: y0, xf: xf, yf: yf)
         return box;
     }
     
-    class func FBBoundingBoxContainsCoordinate(box:FBBoundingBox, coordinate:CLLocationCoordinate2D) -> Bool {
+    class func FBBoundingBoxContainsCoordinate(_ box:FBBoundingBox, coordinate:CLLocationCoordinate2D) -> Bool {
         let containsX:Bool = (box.x0 <= CGFloat(coordinate.latitude)) && (CGFloat(coordinate.latitude) <= box.xf)
         let containsY:Bool = (box.y0 <= CGFloat(coordinate.longitude)) && (CGFloat(coordinate.longitude) <= box.yf)
         return (containsX && containsY)
     }
     
-    class func FBBoundingBoxForMapRect(mapRect: MKMapRect) -> FBBoundingBox {
+    class func FBBoundingBoxForMapRect(_ mapRect: MKMapRect) -> FBBoundingBox {
         let topLeft: CLLocationCoordinate2D = MKCoordinateForMapPoint(mapRect.origin)
         let botRight: CLLocationCoordinate2D = MKCoordinateForMapPoint(MKMapPointMake(MKMapRectGetMaxX(mapRect), MKMapRectGetMaxY(mapRect)))
         
@@ -85,11 +85,11 @@ public class FBQuadTreeNode : NSObject {
         return FBQuadTreeNode.FBBoundingBoxMake(CGFloat(minLat), y0: CGFloat(minLon), xf: CGFloat(maxLat), yf: CGFloat(maxLon))
     }
     
-    class func FBBoundingBoxIntersectsBoundingBox(box1:FBBoundingBox, box2:FBBoundingBox) -> Bool {
+    class func FBBoundingBoxIntersectsBoundingBox(_ box1:FBBoundingBox, box2:FBBoundingBox) -> Bool {
         return (box1.x0 <= box2.xf && box1.xf >= box2.x0 && box1.y0 <= box2.yf && box1.yf >= box2.y0);
     }
     
-    class func FBMapRectForBoundingBox(boundingBox:FBBoundingBox) -> MKMapRect {
+    class func FBMapRectForBoundingBox(_ boundingBox:FBBoundingBox) -> MKMapRect {
         let topLeft:MKMapPoint  = MKMapPointForCoordinate(CLLocationCoordinate2DMake(CLLocationDegrees(boundingBox.x0), CLLocationDegrees(boundingBox.y0)));
         let botRight:MKMapPoint  = MKMapPointForCoordinate(CLLocationCoordinate2DMake(CLLocationDegrees(boundingBox.xf), CLLocationDegrees(boundingBox.yf)));
         

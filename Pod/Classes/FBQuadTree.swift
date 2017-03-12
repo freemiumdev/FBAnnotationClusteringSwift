@@ -9,7 +9,7 @@
 import Foundation
 import MapKit
 
-public class FBQuadTree : NSObject {
+open class FBQuadTree : NSObject {
     
     var rootNode:FBQuadTreeNode? = nil
     
@@ -22,11 +22,11 @@ public class FBQuadTree : NSObject {
         
     }
     
-    func insertAnnotation(annotation:MKAnnotation) -> Bool {
+    func insertAnnotation(_ annotation:MKAnnotation) -> Bool {
         return insertAnnotation(annotation, toNode:rootNode!)
     }
     
-    func insertAnnotation(annotation:MKAnnotation, toNode node:FBQuadTreeNode) -> Bool {
+    func insertAnnotation(_ annotation:MKAnnotation, toNode node:FBQuadTreeNode) -> Bool {
         
         if !FBQuadTreeNode.FBBoundingBoxContainsCoordinate(node.boundingBox!, coordinate: annotation.coordinate) {
             return false
@@ -34,7 +34,7 @@ public class FBQuadTree : NSObject {
         
         if node.count < nodeCapacity {
             node.annotations.append(annotation)
-            node.count++
+            node.count += 1
             return true
         }
         
@@ -63,15 +63,15 @@ public class FBQuadTree : NSObject {
         
     }
     
-    func enumerateAnnotationsInBox(box:FBBoundingBox, callback: MKAnnotation -> Void){
+    func enumerateAnnotationsInBox(_ box:FBBoundingBox, callback: (MKAnnotation) -> Void){
         enumerateAnnotationsInBox(box, withNode:rootNode!, callback: callback)
     }
     
-    func enumerateAnnotationsUsingBlock(callback: MKAnnotation -> Void){
+    func enumerateAnnotationsUsingBlock(_ callback: (MKAnnotation) -> Void){
         enumerateAnnotationsInBox(FBQuadTreeNode.FBBoundingBoxForMapRect(MKMapRectWorld), withNode:rootNode!, callback:callback)
     }
     
-    func enumerateAnnotationsInBox(box:FBBoundingBox, withNode node:FBQuadTreeNode, callback: MKAnnotation -> Void){
+    func enumerateAnnotationsInBox(_ box:FBBoundingBox, withNode node:FBQuadTreeNode, callback: (MKAnnotation) -> Void){
         if (!FBQuadTreeNode.FBBoundingBoxIntersectsBoundingBox(node.boundingBox!, box2: box)) {
             return;
         }
