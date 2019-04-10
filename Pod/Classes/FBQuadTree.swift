@@ -9,90 +9,85 @@
 import Foundation
 import MapKit
 
-public class FBQuadTree : NSObject {
+open class FBQuadTree {
     
-    var rootNode:FBQuadTreeNode? = nil
+    let rootNode = FBQuadTreeNode(boundingBox: FBBoundingBox(mapRect: MKMapRect.world))
+
+	// MARK: Internal functions
     
-    let nodeCapacity = 8
-    
-    override init (){
-        super.init()
-        
-        rootNode = FBQuadTreeNode(boundingBox:FBQuadTreeNode.FBBoundingBoxForMapRect(MKMapRectWorld))
-        
+    func insert(annotation: MKAnnotation) -> Bool {
+        return insert(annotation: annotation, toNode:rootNode)
+    }
+
+    func enumerateAnnotations(inBox box: FBBoundingBox, callback: (MKAnnotation) -> Void) {
+		enumerateAnnotations(inBox: box, withNode:rootNode, callback: callback)
     }
     
-    func insertAnnotation(annotation:MKAnnotation) -> Bool {
-        return insertAnnotation(annotation, toNode:rootNode!)
+    func enumerateAnnotationsUsingBlock(_ callback: (MKAnnotation) -> Void) {
+        enumerateAnnotations(inBox: FBBoundingBox(mapRect: MKMapRect.world), withNode:rootNode, callback:callback)
     }
-    
-    func insertAnnotation(annotation:MKAnnotation, toNode node:FBQuadTreeNode) -> Bool {
-        
-        if !FBQuadTreeNode.FBBoundingBoxContainsCoordinate(node.boundingBox!, coordinate: annotation.coordinate) {
-            return false
+
+	// MARK: Private functions
+
+	private func insert(annotation: MKAnnotation, toNode node: FBQuadTreeNode) -> Bool {
+		if !node.boundingBox.contains(coordinate: annotation.coordinate) {
+			return false
+		}
+
+		if node.canAppendAnnotation() {
+			return node.append(annotation: annotation)
+		}
+
+		let siblings = node.siblings() ?? node.createSiblings()
+
+		if insert(annotation: annotation, toNode:siblings.northEast) {
+			return true
+		}
+
+		if insert(annotation: annotation, toNode:siblings.northWest) {
+			return true
+		}
+
+		if insert(annotation: annotation, toNode:siblings.southEast) {
+			return true
+		}
+
+		if insert(annotation: annotation, toNode:siblings.southWest) {
+			return true
+		}
+
+		return false
+	}
+
+    private func enumerateAnnotations(inBox box: FBBoundingBox, withNode node: FBQuadTreeNode, callback: (MKAnnotation) -> Void) {
+        if !node.boundingBox.intersects(box2: box) {
+            return
         }
-        
-        if node.count < nodeCapacity {
-            node.annotations.append(annotation)
-            node.count++
-            return true
-        }
-        
-        if node.isLeaf() {
-            node.subdivide()
-        }
-        
-        if insertAnnotation(annotation, toNode:node.northEast!) {
-            return true
-        }
-        
-        if insertAnnotation(annotation, toNode:node.northWest!) {
-            return true
-        }
-        
-        if insertAnnotation(annotation, toNode:node.southEast!) {
-            return true
-        }
-        
-        if insertAnnotation(annotation, toNode:node.southWest!) {
-            return true
-        }
-        
-        
-        return false
-        
-    }
-    
-    func enumerateAnnotationsInBox(box:FBBoundingBox, callback: MKAnnotation -> Void){
-        enumerateAnnotationsInBox(box, withNode:rootNode!, callback: callback)
-    }
-    
-    func enumerateAnnotationsUsingBlock(callback: MKAnnotation -> Void){
-        enumerateAnnotationsInBox(FBQuadTreeNode.FBBoundingBoxForMapRect(MKMapRectWorld), withNode:rootNode!, callback:callback)
-    }
-    
-    func enumerateAnnotationsInBox(box:FBBoundingBox, withNode node:FBQuadTreeNode, callback: MKAnnotation -> Void){
-        if (!FBQuadTreeNode.FBBoundingBoxIntersectsBoundingBox(node.boundingBox!, box2: box)) {
-            return;
-        }
-        
-        let tempArray = node.annotations
-        
-        for annotation in tempArray {
-            if (FBQuadTreeNode.FBBoundingBoxContainsCoordinate(box, coordinate: annotation.coordinate)) {
-                callback(annotation);
+
+        for annotation in node.annotations {
+            if box.contains(coordinate: annotation.coordinate) {
+                callback(annotation)
             }
         }
         
         if node.isLeaf() {
             return
         }
-        
-        enumerateAnnotationsInBox(box, withNode: node.northEast!, callback: callback)
-        enumerateAnnotationsInBox(box, withNode: node.northWest!, callback: callback)
-        enumerateAnnotationsInBox(box, withNode: node.southEast!, callback: callback)
-        enumerateAnnotationsInBox(box, withNode: node.southWest!, callback: callback)
-        
+
+		if let northEast = node.northEast {
+			enumerateAnnotations(inBox: box, withNode: northEast, callback: callback)
+		}
+
+		if let northWest = node.northWest {
+			enumerateAnnotations(inBox: box, withNode: northWest, callback: callback)
+		}
+
+		if let southEast = node.southEast {
+			enumerateAnnotations(inBox: box, withNode: southEast, callback: callback)
+		}
+
+		if let southWest = node.southWest {
+			enumerateAnnotations(inBox: box, withNode: southWest, callback: callback)
+		}
     }
-    
 }

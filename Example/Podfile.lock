@@ -1,0 +1,16 @@
+PODS:
+  - FBAnnotationClusteringSwift (2.0)
+
+DEPENDENCIES:
+  - FBAnnotationClusteringSwift (from `../`)
+
+EXTERNAL SOURCES:
+  FBAnnotationClusteringSwift:
+    :path: "../"
+
+SPEC CHECKSUMS:
+  FBAnnotationClusteringSwift: e3cb9e8156e9b732cc67be0ff852f9a9b4f51025
+
+PODFILE CHECKSUM: efab2b6c416e3fa4a2535585461e6c02bd57ea2b
+
+COCOAPODS: 1.5.3
